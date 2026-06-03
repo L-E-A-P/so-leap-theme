@@ -1,35 +1,51 @@
-{% if include.id %}
-  {% assign gallery = page[include.id] %}
-{% else %}
-  {% assign gallery = page.gallery %}
-{% endif %}
+{%- comment -%}
+Galleria fotografica auto-popolata con lightbox (GLightbox).
 
-{% if include.layout %}
-  {% assign gallery_layout = include.layout %}
-{% else %}
-  {% if gallery.size == 2 %}
-    {% assign gallery_layout = 'half' %}
-  {% elsif gallery.size >= 3 %}
-    {% assign gallery_layout = 'third' %}
-  {% else %}
-    {% assign gallery_layout = '' %}
-  {% endif %}
-{% endif %}
+Convenzione: la cartella passata in `path` contiene due sottocartelle:
+  thumb/  immagini ridotte (mostrate in griglia)
+  full/   immagini complete (aperte nel lightbox), STESSI nomi file di thumb/
 
-<figure class="{{ gallery_layout }} {{ include.class }}">
-  {% for img in gallery %}
-    {% if img.url %}
-      <a href="{{ img.url | relative_url }}"
-        {% if img.title %}title="{{ img.title }}"{% endif %}>
-          <img src="{{ img.image_path | relative_url }}"
-               alt="{% if img.alt %}{{ img.alt }}{% endif %}">
+Parametri:
+  path     (obbligatorio) percorso della cartella evento, es. /images/eventi/foo/
+  caption  (opzionale)    didascalia sotto la griglia
+  class    (opzionale)    classi extra sul contenitore <figure>
+{%- endcomment -%}
+
+{%- assign thumb_path = include.path | append: "thumb/" -%}
+{%- assign imgs = site.static_files | where_exp: "f", "f.path contains thumb_path" -%}
+{%- assign gallery_id = include.path | slugify -%}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
+
+<style>
+.gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:0.25rem; margin:1rem 0; }
+.gallery a { display:block; aspect-ratio:1; overflow:hidden; }
+.gallery img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
+.gallery a:hover img { transform:scale(1.04); }
+</style>
+
+<figure class="{{ include.class }}">
+  <div class="gallery">
+  {%- for img in imgs -%}
+    {%- assign ext = img.extname | downcase -%}
+    {%- if ext == ".jpg" or ext == ".jpeg" or ext == ".webp" or ext == ".png" -%}
+      {%- assign full_url = img.path | replace: "/thumb/", "/full/" -%}
+      <a href="{{ full_url | relative_url }}" class="glightbox" data-gallery="{{ gallery_id }}">
+        <img src="{{ img.path | relative_url }}" alt="{{ img.name }}" loading="lazy" decoding="async">
       </a>
-    {% else %}
-      <img src="{{ img.image_path | relative_url }}"
-           alt="{% if img.alt %}{{ img.alt }}{% endif %}">
-    {% endif %}
-  {% endfor %}
+    {%- endif -%}
+  {%- endfor -%}
+  </div>
   {% if include.caption %}
     <figcaption>{{ include.caption | markdownify | remove: "<p>" | remove: "</p>" }}</figcaption>
   {% endif %}
 </figure>
+
+<script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
+<script>
+  (function () {
+    if (window.__glightboxInit) return;
+    window.__glightboxInit = true;
+    GLightbox({ selector: '.glightbox', loop: true, touchNavigation: true });
+  })();
+</script>
