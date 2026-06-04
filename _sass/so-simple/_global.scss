@@ -54,6 +54,14 @@
     border-radius: $border-radius;
   }
 
+  // Separatore non cliccabile fra gruppi di voci (divider: true)
+  .nav-divider {
+    padding: 0.5em 0.25em;
+    opacity: 0.4;
+    user-select: none;
+    pointer-events: none;
+  }
+
   @include breakpoint($medium) {
     display: block;
   }

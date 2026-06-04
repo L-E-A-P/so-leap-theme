@@ -4,12 +4,16 @@
     <nav id="primary-nav" class="site-nav animated drop">
       <ul>
         {%- for link in site.data.navigation -%}
-          {%- if link.url contains '://' -%}
-            {%- assign url = link.url -%}
+          {%- if link.divider -%}
+            <li class="nav-divider" aria-hidden="true">{{ link.title | default: '•' }}</li>
           {%- else -%}
-            {%- assign url = link.url | relative_url -%}
+            {%- if link.url contains '://' -%}
+              {%- assign url = link.url -%}
+            {%- else -%}
+              {%- assign url = link.url | relative_url -%}
+            {%- endif -%}
+            <li><a href="{{ url }}">{{ link.title }}</a></li>
           {%- endif -%}
-          <li><a href="{{ url }}">{{ link.title }}</a></li>
         {%- endfor -%}
       </ul>
     </nav>
