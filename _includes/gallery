@@ -10,8 +10,7 @@ ogni griglia ha un `data-gallery` distinto (derivato dal path).
 
 Parametri:
   path     (obbligatorio) percorso della cartella evento, es. lazzaro/img/foo/
-  caption  (opzionale)    didascalia sotto la griglia
-  class    (opzionale)    classi extra sul contenitore <figure>
+  class    (opzionale)    classi extra sul contenitore .gallery
 {%- endcomment -%}
 
 {%- comment -%}
@@ -41,8 +40,7 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
 .gallery a:hover img { transform:scale(1.04); }
 </style>
 
-<figure class="{{ include.class }}">
-  <div class="gallery">
+<div class="gallery {{ include.class }}">
   {%- for img in imgs -%}
     {%- assign ext = img.extname | downcase -%}
     {%- if ext == ".jpg" or ext == ".jpeg" or ext == ".webp" or ext == ".png" -%}
@@ -54,11 +52,7 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
       </a>
     {%- endif -%}
   {%- endfor -%}
-  </div>
-  {% if include.caption %}
-    <figcaption>{{ include.caption | markdownify | remove: "<p>" | remove: "</p>" }}</figcaption>
-  {% endif %}
-</figure>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 <script>
