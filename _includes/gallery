@@ -23,10 +23,16 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
 {%- assign imgs = "" | split: "" -%}
 {%- if include.path and include.path != "" -%}
   {%- assign thumb_path = include.path | append: "thumb/" -%}
+  {%- comment -%} Le immagini possono stare in due posti, a seconda di dove vive la pagina:
+    - COLLEZIONI (es. _lazzaro/img/...), pagine dei submodule: site.collections[].files
+    - FILE STATICI del sito (es. /images/posts/...), i post: site.static_files
+    Si scorrono ENTRAMBI; il path servito si normalizza piu sotto (vale per tutti e due). {%- endcomment -%}
   {%- for coll in site.collections -%}
     {%- assign hits = coll.files | where_exp: "f", "f.path contains thumb_path" -%}
     {%- assign imgs = imgs | concat: hits -%}
   {%- endfor -%}
+  {%- assign static_hits = site.static_files | where_exp: "f", "f.path contains thumb_path" -%}
+  {%- assign imgs = imgs | concat: static_hits -%}
   {%- assign imgs = imgs | sort: "path" -%}
 {%- endif -%}
 {%- assign gallery_id = include.path | slugify -%}
@@ -44,8 +50,12 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
   {%- for img in imgs -%}
     {%- assign ext = img.extname | downcase -%}
     {%- if ext == ".jpg" or ext == ".jpeg" or ext == ".webp" or ext == ".png" -%}
-      {%- comment -%} path "_lazzaro/img/.../x.jpg" -> URL servito "/lazzaro/img/.../x.jpg" {%- endcomment -%}
-      {%- assign thumb_url = "/" | append: img.path | replace_first: "/_", "/" -%}
+      {%- comment -%} Normalizza il path servito da entrambe le sorgenti:
+        collezione "_lazzaro/img/.../x.jpg" -> "/lazzaro/img/.../x.jpg"
+        statico    "/images/posts/.../x.jpg" -> "/images/posts/.../x.jpg"
+        prepend "/" uniforma, replace_first "//"->"/" sgonfia il doppio slash degli
+        statici, replace_first "/_"->"/" toglie l'underscore delle collezioni. {%- endcomment -%}
+      {%- assign thumb_url = img.path | prepend: "/" | replace_first: "//", "/" | replace_first: "/_", "/" -%}
       {%- assign full_url = thumb_url | replace: "/thumb/", "/edit/" -%}
       <a href="{{ full_url | relative_url }}" class="glightbox" data-gallery="{{ gallery_id }}">
         <img src="{{ thumb_url | relative_url }}" alt="{{ img.name }}" loading="lazy" decoding="async">
