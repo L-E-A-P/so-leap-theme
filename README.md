@@ -734,6 +734,32 @@ To define what pages are linked in the top navigation:
      url: /search/
    ```
 
+### Dividers
+
+To visually group links (for example to separate external sites from internal
+pages), add a `divider: true` entry. Dividers render as a non-clickable, dimmed
+symbol — no `url` is needed:
+
+   ```yaml
+   - title: LEAP
+     url: https://www.leaphz.net
+   - divider: true
+   - title: Posts
+     url: /posts/
+   - title: Categories
+     url: /categories/
+   - divider: true
+   - title: Search
+     url: /search/
+   ```
+
+The divider defaults to `•`. To use a different separator, set a `title`:
+
+   ```yaml
+   - divider: true
+     title: "|"
+   ```
+
 **Note:** Long titles or many links may cause the navigation bar to break into multiple lines, especially on smaller screens. Keep this in mind as you develop your site's primary navigation.
 
 ## Author
