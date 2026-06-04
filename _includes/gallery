@@ -3,16 +3,23 @@ Galleria fotografica auto-popolata con lightbox (GLightbox).
 
 Convenzione: la cartella passata in `path` contiene due sottocartelle:
   thumb/  immagini ridotte (mostrate in griglia)
-  full/   immagini complete (aperte nel lightbox), STESSI nomi file di thumb/
+  edit/   immagini complete (aperte nel lightbox), STESSI nomi file di thumb/
+
+Si possono mettere piu include su una stessa pagina con `path` diversi:
+ogni griglia ha un `data-gallery` distinto (derivato dal path).
 
 Parametri:
-  path     (obbligatorio) percorso della cartella evento, es. /images/eventi/foo/
+  path     (obbligatorio) percorso della cartella evento, es. lazzaro/img/foo/
   caption  (opzionale)    didascalia sotto la griglia
   class    (opzionale)    classi extra sul contenitore <figure>
 {%- endcomment -%}
 
-{%- assign thumb_path = include.path | append: "thumb/" -%}
-{%- assign imgs = site.static_files | where_exp: "f", "f.path contains thumb_path" -%}
+{%- comment -%} Guardia: senza path NON si scansiona tutto il sito (eviterebbe foto miste tra eventi). {%- endcomment -%}
+{%- assign imgs = "" | split: "" -%}
+{%- if include.path and include.path != "" -%}
+  {%- assign thumb_path = include.path | append: "thumb/" -%}
+  {%- assign imgs = site.static_files | where_exp: "f", "f.path contains thumb_path" -%}
+{%- endif -%}
 {%- assign gallery_id = include.path | slugify -%}
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
@@ -29,7 +36,7 @@ Parametri:
   {%- for img in imgs -%}
     {%- assign ext = img.extname | downcase -%}
     {%- if ext == ".jpg" or ext == ".jpeg" or ext == ".webp" or ext == ".png" -%}
-      {%- assign full_url = img.path | replace: "/thumb/", "/full/" -%}
+      {%- assign full_url = img.path | replace: "/thumb/", "/edit/" -%}
       <a href="{{ full_url | relative_url }}" class="glightbox" data-gallery="{{ gallery_id }}">
         <img src="{{ img.path | relative_url }}" alt="{{ img.name }}" loading="lazy" decoding="async">
       </a>
@@ -46,6 +53,10 @@ Parametri:
   (function () {
     if (window.__glightboxInit) return;
     window.__glightboxInit = true;
-    GLightbox({ selector: '.glightbox', loop: true, touchNavigation: true });
+    // Inizializza dopo il parsing completo: cosi raccoglie TUTTE le griglie
+    // anche quando ci sono piu include gallery nella stessa pagina.
+    var init = function () { GLightbox({ selector: '.glightbox', loop: true, touchNavigation: true }); };
+    if (document.readyState !== 'loading') { init(); }
+    else { document.addEventListener('DOMContentLoaded', init); }
   })();
 </script>
