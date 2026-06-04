@@ -57,12 +57,22 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 <script>
   (function () {
-    if (window.__glightboxInit) return;
-    window.__glightboxInit = true;
-    // Inizializza dopo il parsing completo: cosi raccoglie TUTTE le griglie
-    // anche quando ci sono piu include gallery nella stessa pagina.
-    var init = function () { GLightbox({ selector: '.glightbox', loop: true, touchNavigation: true }); };
-    if (document.readyState !== 'loading') { init(); }
-    else { document.addEventListener('DOMContentLoaded', init); }
+    if (!window.__glightboxInit) {
+      window.__glightboxInit = true;
+      // Inizializza dopo il parsing completo: cosi raccoglie TUTTE le griglie
+      // anche quando ci sono piu include gallery nella stessa pagina.
+      var init = function () { GLightbox({ selector: '.glightbox', loop: true, touchNavigation: true }); };
+      if (document.readyState !== 'loading') { init(); }
+      else { document.addEventListener('DOMContentLoaded', init); }
+    }
+    // Il main.min.js del tema aggiunge data-lity a OGNI link immagine (al ready di
+    // jQuery), aprendo una seconda lightbox (Lity) sopra GLightbox. Lo togliamo dai
+    // link della griglia DOPO il load, quando quel tagging e gia avvenuto.
+    var strip = function () {
+      var links = document.querySelectorAll('.gallery a.glightbox[data-lity]');
+      for (var i = 0; i < links.length; i++) { links[i].removeAttribute('data-lity'); }
+    };
+    if (document.readyState === 'complete') { strip(); }
+    else { window.addEventListener('load', strip); }
   })();
 </script>
