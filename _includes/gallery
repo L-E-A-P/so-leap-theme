@@ -37,6 +37,12 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
 {%- endif -%}
 {%- assign gallery_id = include.path | slugify -%}
 
+{%- comment -%} CSS e JS di GLightbox servono UNA volta sola per pagina, anche con piu
+  include gallery: la guardia `gallery_assets_emitted` sfrutta il fatto che gli assign
+  di un include in Jekyll restano visibili negli include successivi della stessa pagina.
+  Il flag viene messo a true solo in fondo, cosi sia questo blocco CSS sia quello JS in
+  coda scattano entrambi al primo include e vengono saltati da quelli dopo. {%- endcomment -%}
+{%- unless gallery_assets_emitted -%}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css">
 
 <style>
@@ -45,6 +51,7 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
 .gallery img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
 .gallery a:hover img { transform:scale(1.04); }
 </style>
+{%- endunless -%}
 
 <div class="gallery {{ include.class }}">
   {%- for img in imgs -%}
@@ -64,6 +71,7 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
   {%- endfor -%}
 </div>
 
+{%- unless gallery_assets_emitted -%}
 <script src="https://cdn.jsdelivr.net/npm/glightbox/dist/js/glightbox.min.js"></script>
 <script>
   (function () {
@@ -86,3 +94,5 @@ Guardia: senza path non si raccoglie nulla (eviterebbe foto miste tra eventi).
     else { window.addEventListener('load', strip); }
   })();
 </script>
+{%- assign gallery_assets_emitted = true -%}
+{%- endunless -%}
