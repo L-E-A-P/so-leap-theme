@@ -12,6 +12,8 @@ $(document).ready(function() {
   // initialize smooth scroll
   $("a").smoothScroll({ offset: -20 });
 
-  // add lightbox class to all image links
-  $("a[href$='.jpg'], a[href$='.png'], a[href$='.gif']").attr("data-lity", "");
+  // add lightbox class to all image links, ESCLUSI i link delle gallerie
+  // (.glightbox): quelli usano GLightbox, non Lity, e taggarli aprirebbe una
+  // seconda lightbox sopra la prima.
+  $("a[href$='.jpg']:not(.glightbox), a[href$='.png']:not(.glightbox), a[href$='.gif']:not(.glightbox)").attr("data-lity", "");
 });
